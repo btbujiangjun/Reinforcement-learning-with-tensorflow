@@ -11,14 +11,14 @@ import pandas as pd
 
 class QLearningTable:
     def __init__(self, actions, learning_rate=0.01, reward_decay=0.9, e_greedy=0.9):
-        self.actions = actions  # a list
+        self.actions = actions  # a list, 包含上下左右
         self.lr = learning_rate
         self.gamma = reward_decay
         self.epsilon = e_greedy
-        self.q_table = pd.DataFrame(columns=self.actions, dtype=np.float64)
+        self.q_table = pd.DataFrame(columns=self.actions, dtype=np.float64) #只指定了columns，rows动态插入
 
     def choose_action(self, observation):
-        self.check_state_exist(observation)
+        self.check_state_exist(observation) # 确认q_table存在
         # action selection
         if np.random.uniform() < self.epsilon:
             # choose best action
@@ -27,7 +27,7 @@ class QLearningTable:
             action = np.random.choice(state_action[state_action == np.max(state_action)].index)
         else:
             # choose random action
-            action = np.random.choice(self.actions)
+            action = np.random.choice(self.actions) # 按一定概率探索
         return action
 
     def learn(self, s, a, r, s_):
@@ -40,6 +40,7 @@ class QLearningTable:
         self.q_table.loc[s, a] += self.lr * (q_target - q_predict)  # update
 
     def check_state_exist(self, state):
+        # 当前步骤不存在则动态插入(state就是q_table的row index)
         if state not in self.q_table.index:
             # append new state to q table
             self.q_table = self.q_table.append(
